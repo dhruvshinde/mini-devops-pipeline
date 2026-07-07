@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'github-token',
+                    url: 'https://github.com/dhruvshinde/mini-devops-pipeline.git'
+            }
+        }
+
+        stage('Build & Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
+                        def app = docker.build("dhruv52991/hello-dhruv-app:${BUILD_NUMBER}", "./app")
+                        app.push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                kubectl set image deployment/hello-dhruv-deployment \
+                hello-dhruv-container=dhruv52991/hello-dhruv-app:${BUILD_NUMBER} --record
+                '''
+            }
+        }
+    }
+}
+
