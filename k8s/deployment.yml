@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dhruv-deployment
+  labels:
+    app: hello-dhruv
+spec: 
+  replicas: 2
+  selector: 
+    matchLabels: 
+      app: hello-dhruv
+  template:
+    metadata:
+      labels:
+        app: hello-dhruv
+    spec:
+      containers:
+      - name: hello-dhruv-container
+        image: dhruv52991/hello-dhruv-app:v1
+        ports:
+        - containerPort: 3000
+
