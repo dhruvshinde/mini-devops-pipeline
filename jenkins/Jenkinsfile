@@ -22,13 +22,9 @@ pipeline {
             steps {
                 sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config set image deployment/hello-dhruv-deployment hello-dhruv-container=dhruv52991/hello-dhruv-app:${BUILD_NUMBER}'
                 sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config rollout restart deployment/hello-dhruv-deployment'
-                timeout(time: 2, unit: 'MINUTES') {
-                    sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config rollout status deployment/hello-dhruv-deployment'
-                }
+                sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config get pods -o wide'
             }
         }
     }
 }
-
-
 
