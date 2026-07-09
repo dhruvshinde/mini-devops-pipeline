@@ -1,37 +1,18 @@
-stage('Deploy') {
-    steps {
-        sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config set image deployment/hello-dhruv-deployment hello-dhruv-container=dhruv52991/hello-dhruv-app:${BUILD_NUMBER} --record'
-        sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config rollout status deployment/hello-dhruv-deployment'
-    }
-}pipeline {
+pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'master',
-                    credentialsId: 'githubcheckout',
-                    url: 'https://github.com/dhruvshinde/mini-devops-pipeline.git'
-            }
-        }
-
         stage('Build & Push') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
-                        def app = docker.build("dhruv52991/hello-dhruv-app:${BUILD_NUMBER}", "./app")
-                        app.push()
-                    }
-                }
+                sh 'docker build -t dhruv52991/hello-dhruv-app:${BUILD_NUMBER} ./app'
+                sh 'docker push dhruv52991/hello-dhruv-app:${BUILD_NUMBER}'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh '''
-                kubectl set image deployment/hello-dhruv-deployment \
-                hello-dhruv-container=dhruv52991/hello-dhruv-app:${BUILD_NUMBER} --record
-                '''
+                sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config set image deployment/hello-dhruv-deployment hello-dhruv-container=dhruv52991/hello-dhruv-app:${BUILD_NUMBER} --record'
+                sh 'kubectl --kubeconfig=/var/jenkins_home/.kube/config rollout status deployment/hello-dhruv-deployment'
             }
         }
     }
