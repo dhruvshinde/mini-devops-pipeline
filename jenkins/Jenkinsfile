@@ -2,10 +2,19 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build & Push') {
             steps {
                 sh 'docker build -t dhruv52991/hello-dhruv-app:${BUILD_NUMBER} ./app'
-                sh 'docker push dhruv52991/hello-dhruv-app:${BUILD_NUMBER}'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh 'docker push dhruv52991/hello-dhruv-app:${BUILD_NUMBER}'
+                }
             }
         }
 
@@ -17,4 +26,5 @@ pipeline {
         }
     }
 }
+
 
